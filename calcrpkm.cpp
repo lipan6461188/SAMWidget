@@ -35,7 +35,7 @@ bool read_is_reverse(const vector<string> &read)
 {
     if ( stoi(read.at(1)) & 16 )
     {
-        printRead(read);
+        //printRead(read);
         return true;
     }
     else
