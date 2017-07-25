@@ -79,7 +79,7 @@ void addOneRead_RPKM(CStringMatrix &sameReadArray, StringToUL &chrSingleRead, St
     }
 }
 
-double RPKM(uLONG read_in_gene, uLONG gene_len, uLONG total_reads)
+double RPKM(double read_in_gene, uLONG gene_len, uLONG total_reads)
 {
     return 1.0 * read_in_gene / ( (1.0 * gene_len / 1000) * (1.0 * total_reads/1000000) + 0.01 );
 }
@@ -327,6 +327,7 @@ void SamAlign::calcRPKM(bool removeMultiMap, bool removeGappedRead, bool removeR
             currentReadName = samItems[0];
         }
     }
+    addOneRead_RPKM(sameReadArray, chrSingleRead, chrMultiRead, total_mapped_reads, removeMultiMap, removeGappedRead, removeReverseRead);
 
     // return back to start position
     //SAM.seekg(lastLinePos);
@@ -337,10 +338,10 @@ void SamAlign::calcRPKM(bool removeMultiMap, bool removeGappedRead, bool removeR
     {
         string chrName = singleMap.first;
         uLONG single_mapped_reads = singleMap.second;
-        uLONG mutiple_mapped_reads = chrMultiRead[chrName].size();
-       // double averaged_mutiple_mapped_reads = accumulate(chrMultiRead[chrName].begin(), chrMultiRead[chrName].end(), 0.0);
+        //uLONG mutiple_mapped_reads = chrMultiRead[chrName].size();
+        double averaged_mutiple_mapped_reads = accumulate(chrMultiRead[chrName].begin(), chrMultiRead[chrName].end(), 0.0);
 
-        chrRPKM[chrName] = RPKM(single_mapped_reads+mutiple_mapped_reads, chrLen[chrName], total_mapped_reads);
+        chrRPKM[chrName] = RPKM(single_mapped_reads+averaged_mutiple_mapped_reads, chrLen[chrName], total_mapped_reads);
        // cout << chrName << ":   " << chrLen[chrName] << "\t" << single_mapped_reads << "   " << mutiple_mapped_reads << "   " << averaged_mutiple_mapped_reads << "   " << chrRPKM[chrName] << endl;
     }
 }

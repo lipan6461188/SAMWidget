@@ -29,7 +29,7 @@ void addOneRead_RPKM(CStringMatrix &sameReadArray, StringToUL &chrSingleRead,
                      bool removeMultiMap=false, bool removeGappedRead=false, bool removeReverseRead=false);
 
 // fomula to calculate RPKM
-double RPKM(uLONG read_in_gene, uLONG gene_len, uLONG total_reads);
+double RPKM(double read_in_gene, uLONG gene_len, uLONG total_reads);
 
 // read chrLen from sam file
 void readChrLen(ifstream &SAM, StringToUL &chrLen);
