@@ -128,6 +128,12 @@ int SamAlign::readChrLen()
         return IO_ERROR;
     }
 
+    chrLen.clear();
+    chrMultiRead.clear();
+    chrRPKM.clear();
+    chrSingleRead.clear();
+    total_mapped_reads = 0;
+
     ifstream &SAM = *pSAM;
     chrLen.clear();
 
