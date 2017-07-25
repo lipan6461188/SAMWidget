@@ -81,7 +81,7 @@ void addOneRead_RPKM(CStringMatrix &sameReadArray, StringToUL &chrSingleRead, St
 
 double RPKM(double read_in_gene, uLONG gene_len, uLONG total_reads)
 {
-    return 1.0 * read_in_gene / ( (1.0 * gene_len / 1000) * (1.0 * total_reads/1000000) + 0.01 );
+    return 1000000000.0 * read_in_gene / ( 1.0 * gene_len * total_reads + 1.0 );
 }
 
 void readChrLen(ifstream &SAM, StringToUL &chrLen)
@@ -301,7 +301,7 @@ void SamAlign::calcRPKM(bool removeMultiMap, bool removeGappedRead, bool removeR
 
     // record the start of sam
     ifstream &SAM = *pSAM;
-    auto lastLinePos = SAM.tellg();
+   // auto lastLinePos = SAM.tellg();
 
     string thisLine;
     string currentReadName;
@@ -342,7 +342,20 @@ void SamAlign::calcRPKM(bool removeMultiMap, bool removeGappedRead, bool removeR
         double averaged_mutiple_mapped_reads = accumulate(chrMultiRead[chrName].begin(), chrMultiRead[chrName].end(), 0.0);
 
         chrRPKM[chrName] = RPKM(single_mapped_reads+averaged_mutiple_mapped_reads, chrLen[chrName], total_mapped_reads);
-       // cout << chrName << ":   " << chrLen[chrName] << "\t" << single_mapped_reads << "   " << mutiple_mapped_reads << "   " << averaged_mutiple_mapped_reads << "   " << chrRPKM[chrName] << endl;
+
+        /*
+        if(chrName=="ENST00000004531_ENSG00000003989")
+        {
+            cout << chrName << endl;
+            cout << "single: " << single_mapped_reads << endl;
+            cout << "multi: " << averaged_mutiple_mapped_reads << endl;
+            cout << "len: " << chrLen[chrName] << endl;
+            cout << "total: " << total_mapped_reads << endl;
+            cout << "rpkm: " << chrRPKM[chrName] << endl;
+        }
+        */
+
+        // cout << chrName << ":   " << chrLen[chrName] << "\t" << single_mapped_reads << "   " << mutiple_mapped_reads << "   " << averaged_mutiple_mapped_reads << "   " << chrRPKM[chrName] << endl;
     }
 }
 

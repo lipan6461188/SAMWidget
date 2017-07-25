@@ -122,13 +122,14 @@ void MainWindow::calcRPKM()
         chrLen.at(chrName);
 
         double averaged_mutiple_mapped_reads = accumulate(chrMultiRead.at(chrName).begin(), chrMultiRead.at(chrName).end(), 0.0);
-        std::cout << chrName << ":  " << averaged_mutiple_mapped_reads << endl;
+      //  std::cout << chrName << ":  " << averaged_mutiple_mapped_reads << endl;
         uLONG multiMapReads = chrMultiRead.at(chrName).size();
         chrRPKMInfo << QString(chrName.c_str()) << QString( std::to_string(chrLen.at(chrName)).c_str() ) << QString( std::to_string(chrSingleRead.at(chrName)).c_str() )
                     << QString( std::to_string(multiMapReads).c_str() ) << QString::number(averaged_mutiple_mapped_reads)
                     << QString( std::to_string(chrRPKM.at(chrName)).c_str() );
         items.append(new QTreeWidgetItem(ui->chrLenList, chrRPKMInfo));
     }
+    std::cout << "Mapped Reads: " << total_mapped_reads << endl;
     ui->chrLenList->insertTopLevelItems(0, items);
 }
 
