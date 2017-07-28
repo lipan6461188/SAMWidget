@@ -14,6 +14,8 @@ using StringToUL = map<string, uLONG>;
 using StringToDA = map< string, vector<double> >;
 // String to double
 using StringToD = map<string, double>;
+// String to uLONG Array
+using StringToULMatrix = map<string, vector<uLONG>>;
 
 // print stdout read information
 void printRead(const vector<string> &read);
@@ -106,6 +108,15 @@ public:
     //get total num
     uLONG getTotalReadNum(){ return total_mapped_reads; }
 
+    //calcBD/RT
+    void calcBDRT(bool removeMultiMap=true, bool removeGappedRead=true, bool removeReverseRead=true);
+
+    //output BD/RT information
+    void writeBDRT(ofstream &RT_OUT, ofstream &BD_OUT);
+    //get chr BD/RT
+    pair<vector<uLONG>,vector<uLONG>>  getChrBDRT( const string &chrName );
+
+
 private:
     shared_ptr<ifstream> pSAM;      // pointer to sam iftream
     StringToUL chrLen;              // map<string, usigned long> to record chr length
@@ -113,6 +124,8 @@ private:
     StringToDA chrMultiRead;        // mutiple mapped reads
     uLONG total_mapped_reads = 0UL; // total mapped reads
     StringToD chrRPKM;              // RPKM of chromosome
+    StringToULMatrix BD;           // BD of chromosome
+    StringToULMatrix RT;           // RT of chromosome
 
     // read chrLen from sam file
     int readChrLen();

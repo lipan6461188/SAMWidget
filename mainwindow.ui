@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
-    <height>406</height>
+    <width>731</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="3">
+    <item row="0" column="0">
      <widget class="QLineEdit" name="samFIleLineEdit"/>
     </item>
     <item row="0" column="3" colspan="2">
@@ -70,31 +70,38 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2" colspan="2">
+    <item row="2" column="2">
      <widget class="QCheckBox" name="gappedBox">
       <property name="text">
        <string>gapped</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="4" colspan="2">
+    <item row="2" column="3">
      <widget class="QCheckBox" name="reverseBox">
       <property name="text">
        <string>reverse</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="6" colspan="2">
+    <item row="2" column="4" colspan="2">
      <widget class="QPushButton" name="fewReadsButton">
       <property name="text">
        <string>Few Reads</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="8">
+    <item row="2" column="6" colspan="2">
      <widget class="QPushButton" name="rpkmButton">
       <property name="text">
        <string>calcRPKM</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <widget class="QPushButton" name="bdButton">
+      <property name="text">
+       <string>calcBD</string>
       </property>
      </widget>
     </item>
@@ -105,7 +112,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>633</width>
+     <width>731</width>
      <height>22</height>
     </rect>
    </property>

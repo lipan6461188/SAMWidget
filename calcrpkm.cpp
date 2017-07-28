@@ -42,6 +42,190 @@ bool read_is_reverse(const vector<string> &read)
         return false;
 }
 
+
+/*
+while(cin >> cigar)
+{
+    vector<int> cigarLen;
+    vector<char> cigarAlpha;
+    splitCigar(cigar, cigarLen, cigarAlpha);
+    for(auto cLen: cigarLen)
+        cout << cLen << "  ";
+    cout << "\n";
+    for(auto cAlpha: cigarAlpha)
+        cout << cAlpha << "  ";
+    cout << "\n";
+}
+*/
+
+void splitCigar(const string &cigar, vector<int> &cigarLen, vector<char> &cigarAlpha)
+{
+    string lastNum;
+    cigarLen.clear();
+    cigarAlpha.clear();
+    for(size_t i=0; i<cigar.size(); i++)
+    {
+        char character = cigar.at(i);
+        if(character >= '0' and character <= '9')
+        {
+            lastNum.push_back(character);
+        }else{
+            if(not lastNum.empty())
+            {
+                cigarLen.push_back( stoi(lastNum) );
+                lastNum.clear();
+            }
+            cigarAlpha.push_back(character);
+        }
+    }
+}
+
+
+
+/*
+string cigar;
+while(cin >> cigar)
+{
+    vector<pair<uLONG, uLONG>> matchRegion;
+    getMatchRegion(cigar, 1, matchRegion);
+    for(auto region: matchRegion)
+        cout << region.first << "-" << region.second << endl;
+    cout << "\n";
+}
+*/
+
+/*
+ *  M 1 match/mismatch
+ *  D 1 deletion(very short skip)
+ *  I 0 insertion
+ *  N 0 1 skipped(genome region is included)
+ *  S 0 soft-clip
+ *  H 0 hard-clip
+ *  P 0 padding
+ *  = 1 match
+ *  X 1 mismatch
+ *
+ *  We can test these cigars:
+ *  1M2N2M 1M2N2N2M 1M2N2N2M2M 1M2N2N2M2M10S 10S1M2N2N2M2M10S 10S1M2N1X1=2N2M2M10S
+ */
+
+void getMatchRegion(const string &cigar, uLONG startPos, vector<pair<uLONG, uLONG>> &matchRegion)
+{
+    vector<int> cigarLen;
+    vector<char> cigarAlpha;
+    matchRegion.clear();
+    splitCigar(cigar, cigarLen, cigarAlpha);
+
+    uLONG lastStartPos = startPos;
+    uLONG curGenomePos = startPos;
+    for(size_t i=0; i<cigarLen.size(); ++i)
+    {
+        switch(cigarAlpha[i])
+        {
+            case 'M': case 'D': case '=': case 'X':
+                curGenomePos += cigarLen[i];
+                break;
+            case 'I': case 'S': case 'H': case 'P':
+                if(lastStartPos != curGenomePos)
+                {
+                    matchRegion.push_back(make_pair(lastStartPos, curGenomePos-1));
+                    lastStartPos = curGenomePos;
+                }
+                break;
+            case 'N':
+                if(lastStartPos != curGenomePos)
+                    matchRegion.push_back(make_pair(lastStartPos, curGenomePos-1));
+                lastStartPos = curGenomePos = curGenomePos + cigarLen[i];
+                break;
+            default:
+                cerr << "Unrecognized Cigar Alpha: " << cigar << endl;
+                matchRegion.clear();
+                return;
+        }
+    }
+
+    if(lastStartPos != curGenomePos)
+        matchRegion.push_back(make_pair(lastStartPos, curGenomePos-1));
+}
+
+
+/*
+string samLineString = "D00489:204:CA5TEANXX:3:1303:13140:3486  256     ENST00000367264_ENSG00000117139 20     0       6S5M2N3M2N4N3M2D3M20S   *       0       0";
+istringstream samStream(samLineString);
+vector<string> samLine;
+string tmpString;
+while(samStream)
+{
+    samStream >> tmpString;
+    samLine.push_back(tmpString);
+}
+
+StringToULMatrix BD;
+BD["ENST00000367264_ENSG00000117139"] = vector<uLONG>(100);
+addBDtoChr(samLine, BD);
+
+cout << "size: " << BD["ENST00000367264_ENSG00000117139"].size() << endl;
+for(size_t i=0;i<BD["ENST00000367264_ENSG00000117139"].size(); i++)
+{
+    cout << i << ": " << BD["ENST00000367264_ENSG00000117139"].at(i) << "   ";
+}
+cout << endl;
+*/
+
+void addBDRTtoChr(CStringMatrix &sameReadArray, StringToULMatrix &BD, StringToULMatrix &RT, bool removeMultiMap, bool removeGappedRead, bool removeReverseRead)
+{
+
+    // collect the valid map
+    vector< vector<string> > filteredVector;
+    for(auto readInfo: sameReadArray)
+    {
+        if( not read_is_mapped(readInfo) )
+            continue;
+        if( removeGappedRead and read_is_gapped(readInfo))
+            continue;
+        if( removeReverseRead and read_is_reverse(readInfo) )
+            continue;
+        filteredVector.push_back(readInfo);
+    }
+
+    if( (removeMultiMap and filteredVector.size() > 1) or filteredVector.size() == 0 )
+    {
+        //skip this read
+    }
+    else{
+        for(auto samLine: sameReadArray)
+        {
+            string chrName = samLine.at(2);
+            string cigar = samLine.at(5);
+            uLONG pos = stoul(samLine.at(3));
+
+            // RT
+            ++RT.at(chrName).at(pos-1);
+
+            // BD
+            vector<pair<uLONG, uLONG>> matchRegion;
+            getMatchRegion(cigar, pos, matchRegion);
+
+            auto begin = BD.at(chrName).begin();
+            for(auto region: matchRegion)
+            {
+                for(size_t i=region.first; i<=region.second; i++)
+                    ++*(begin+i-1);
+            }
+        }
+    }
+}
+
+
+
+void initBD(const StringToUL &chrLen, StringToULMatrix &BD)
+{
+    BD.clear();
+    for(auto chr_length: chrLen)
+        BD[ chr_length.first ] = vector<uLONG>(chr_length.second);
+}
+
+
 void addOneRead_RPKM(CStringMatrix &sameReadArray, StringToUL &chrSingleRead, StringToDA &chrMultiRead,
                      uLONG &total_mapped_reads, bool removeMultiMap, bool removeGappedRead, bool removeReverseRead)
 {
@@ -114,6 +298,7 @@ void readChrLen(ifstream &SAM, StringToUL &chrLen)
         lastLinePos = SAM.tellg();
     }
 }
+
 
 int SamAlign::readChrLen()
 {
@@ -359,12 +544,83 @@ void SamAlign::calcRPKM(bool removeMultiMap, bool removeGappedRead, bool removeR
     }
 }
 
+void SamAlign::calcBDRT(bool removeMultiMap, bool removeGappedRead, bool removeReverseRead)
+{
+    // initinize
+    initBD(chrLen, BD);
+    initBD(chrLen, RT);
+
+    if(not is_good())
+        return;
+
+    clog << "Start to calculate Base Density..." << endl;
+
+    ifstream &SAM = *pSAM;
+
+    string thisLine;
+    string currentReadName;
+    vector< vector<string> > sameReadArray;
+    vector<string> samItems;
+    uLONG count = 0;
+
+    while( getline(SAM, thisLine) )
+    {
+        ++count;
+        if(count % 100000 == 0)
+            clog << "Have read " << count << " lines..." << endl;
+
+        split(thisLine, '\t', samItems);
+        if( samItems[0] == currentReadName )
+        {   // it's a multi-map
+            sameReadArray.push_back(samItems);
+        }else{
+            // process those reads
+            addBDRTtoChr(sameReadArray, BD, RT, removeMultiMap, removeGappedRead, removeReverseRead);
+            //addBDtoChr(sameReadArray, BD, removeMultiMap, removeGappedRead, removeReverseRead);
+            //addOneRead_RPKM(sameReadArray, chrSingleRead, chrMultiRead, total_mapped_reads, removeMultiMap, removeGappedRead, removeReverseRead);
+            sameReadArray.clear();
+            sameReadArray.push_back(samItems);
+            currentReadName = samItems[0];
+        }
+    }
+    addBDRTtoChr(sameReadArray, BD, RT, removeMultiMap, removeGappedRead, removeReverseRead);
+    //addOneRead_RPKM(sameReadArray, chrSingleRead, chrMultiRead, total_mapped_reads, removeMultiMap, removeGappedRead, removeReverseRead);
+
+    // return back to start position
+    //SAM.seekg(lastLinePos);
+    SAM.close();
+}
 
 
+void SamAlign::writeBDRT(ofstream &RT_OUT, ofstream &BD_OUT)
+{
+    if(not RT_OUT || not BD_OUT)
+    {
+        cerr << "bad ofstream" << endl;
+        return;
+    }
+    for(auto const &bdPair: BD)
+    {
+        BD_OUT << bdPair.first;
+        for(auto bdvalue: bdPair.second)
+            BD_OUT << "\t" << bdvalue;
+        BD_OUT << "\n";
+    }
+    for(auto const &rtPair: RT)
+    {
+        RT_OUT << rtPair.first;
+        for(auto rtvalue: rtPair.second)
+            RT_OUT << "\t" << rtvalue;
+        RT_OUT << "\n";
+    }
+}
 
 
-
-
-
-
-
+pair<vector<uLONG>,vector<uLONG>>  SamAlign::getChrBDRT(const string &chrName)
+{
+    try{
+          return make_pair(BD.at(chrName), RT.at(chrName));
+      }catch(exception e){
+          return make_pair(vector<uLONG>(0), vector<uLONG>(0));
+      }
+}

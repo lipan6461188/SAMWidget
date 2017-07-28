@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -36,6 +37,11 @@ HEADERS += \
     include_heder.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    bdwindow.ui
 
 CONFIG-=app_bundle
+
+DISTFILES += \
+    BaseDensityViewerForm.ui.qml \
+    BaseDensityViewer.qml

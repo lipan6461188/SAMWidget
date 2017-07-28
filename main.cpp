@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include "calcrpkm.h"
+#include <sstream>
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -8,6 +12,18 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+
+    /*
+    SamAlign samAlign("/Users/lee/test.sam");
+    samAlign.calcBD();
+
+    ofstream OUT("/Users/lee/test.bd", ofstream::out);
+    if(OUT)
+        samAlign.writeBD(OUT);
+    OUT.close();
+
+    cout << "finish..." << endl;
+    */
 
     /*
     shared_ptr<ifstream> pSAM;
